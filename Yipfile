@@ -26,6 +26,7 @@ import ios-util
 public_headers
 {
 	ios/NZParseAvatar.h
+	ios/NZParseAvatarButton.h
 	ios/NZParseAvatarController.h
 	ios/NZParseAvatarImageView.h
 }
@@ -33,6 +34,7 @@ public_headers
 sources:ios
 {
 	ios/NZParseAvatar.m
+	ios/NZParseAvatarButton.m
 	ios/NZParseAvatarController.m
 	ios/NZParseAvatarImageView.m
 }
