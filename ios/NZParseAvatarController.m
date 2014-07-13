@@ -60,13 +60,11 @@
 		activityIndicator = [[UIActivityIndicatorView alloc]
 			initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
 		activityIndicator.hidden = YES;
-		[blackoutView addSubview:activityIndicator];
 
 		progressView = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
 		progressView.hidden = YES;
 		progressView.progressTintColor = [UIColor whiteColor];
 		progressView.trackTintColor = [UIColor blackColor];
-		[blackoutView addSubview:progressView];
 
 		[NZParseAvatar addListener:self];
 		[self setUser:aUser];

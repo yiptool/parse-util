@@ -42,6 +42,8 @@
 		controller = [[NZParseAvatarController alloc] initWithUser:user placeholderImage:image isThumbnail:thumb];
 		controller.onImageChanged = ^(UIImage * image) { self.backgroundImage = image; };
 		[self addSubview:controller.blackoutView];
+		[self addSubview:controller.activityIndicator];
+		[self addSubview:controller.progressView];
 
 		self.contentMode = UIViewContentModeScaleAspectFill;
 		self.imageView.contentMode = UIViewContentModeScaleAspectFill;
