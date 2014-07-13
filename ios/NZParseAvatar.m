@@ -252,7 +252,7 @@ static long long g_SerialID = 0;
 					[listener onContinueUploadingAvatarForUser:user progress:progress requestID:requestID];
 			}];
 		} progressBlock:^(int percentDone) {
-			float progress = (float)percentDone / 100.0f * 0.7f + 0.3f;
+			float progress = (float)percentDone / 100.0f * 0.3f;
 			for (id<NZParseAvatarListener> listener in g_AvatarListeners)
 				[listener onContinueUploadingAvatarForUser:user progress:progress requestID:requestID];
 		}];
