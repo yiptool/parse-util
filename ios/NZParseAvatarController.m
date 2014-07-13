@@ -271,7 +271,12 @@
 {
 	blackoutView.frame = frame;
 	activityIndicator.frame = frame;
-	progressView.frame = frame;
+
+	CGFloat w = frame.size.width * 4.0f / 5.0f;
+	CGFloat h = 2.0f;
+	CGFloat x = frame.origin.x + (frame.size.width - w) * 0.5f;
+	CGFloat y = frame.origin.y + (frame.size.height - h) * 0.5f;
+	progressView.frame = CGRectMake(x, y, w, h);
 }
 
 @end
