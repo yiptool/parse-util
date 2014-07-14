@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 //
 #import "NZParseAvatar.h"
+#import "NZParseImageUploader.h"
 #import <yip-imports/ios/image.h>
 #import <yip-imports/ios/uuid.h>
 #import <yip-imports/ios/UIImage+Resize.h>
@@ -185,78 +186,46 @@ static long long g_SerialID = 0;
 			[listener onEndUploadingAvatarForUser:user image:image thumbnail:thumb requestID:requestID];
 	};
 
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		CGFloat thumbnailWidth = g_ThumbnailWidth / image.scale;
-		CGFloat thumbnailHeight = g_ThumbnailHeight / image.scale;
-		CGFloat width = image.size.width;
-		CGFloat height = image.size.height;
+	NZParseImageUploader * uploader = [[[NZParseImageUploader alloc] initWithImage:image] autorelease];
+	uploader.thumbnailWidth = g_ThumbnailWidth;
+	uploader.thumbnailHeight = g_ThumbnailHeight;
 
-		if (width > thumbnailWidth || height > thumbnailHeight)
+	uploader.progressCallback = ^(CGFloat progress) {
+		for (id<NZParseAvatarListener> listener in g_AvatarListeners)
+			[listener onContinueUploadingAvatarForUser:user progress:progress requestID:requestID];
+	};
+
+	uploader.completionCallback = ^(UIImage * image, UIImage * thumb, PFFile * imageFile, PFFile * thumbFile) {
+		if (!image || !thumb || !imageFile || !thumbFile)
 		{
-			CGFloat scaleX = thumbnailWidth / width;
-			CGFloat scaleY = thumbnailHeight / height;
-			CGFloat scale = MAX(scaleX, scaleY);
-
-			width *= scale;
-			height *= scale;
+			callback(nil, nil);
+			return;
 		}
 
-		UIImage * thumb = [image resizedImage:CGSizeMake(width, height) interpolationQuality:kCGInterpolationHigh];
-		NSData * imageData = UIImageJPEGRepresentation(image, 0.9f);
-		NSData * thumbData = UIImageJPEGRepresentation(thumb, 0.6f);
+		@try
+		{
+			user[@"avatarThumbImage"] = thumbFile;
+			user[@"avatarImage"] = imageFile;
+		}
+		@catch (id e)
+		{
+			NSLog(@"Unable to store avatar data in PFUser: %@", e);
+			callback(nil, nil);
+			return;
+		}
 
-		NSString * imageId = iosGenerateUUID();
-		NSString * thumbId = iosGenerateUUID();
-
-		PFFile * imageFile = [PFFile fileWithName:imageId data:imageData];
-		PFFile * thumbFile = [PFFile fileWithName:thumbId data:thumbData];
-
-		[thumbFile saveInBackgroundWithBlock:^(BOOL succeeded, NSError * error) {
+		[user saveInBackgroundWithBlock:^(BOOL succeeded, NSError * error) {
 			if (!succeeded || error)
 			{
 				callback(nil, nil);
 				return;
 			}
 
-			[imageFile saveInBackgroundWithBlock:^(BOOL succeeded, NSError * error) {
-				if (!succeeded || error)
-				{
-					callback(nil, nil);
-					return;
-				}
-
-				@try
-				{
-					user[@"avatarThumbImage"] = thumbFile;
-					user[@"avatarImage"] = imageFile;
-				}
-				@catch (id e)
-				{
-					NSLog(@"Unable to store avatar data in PFUser: %@", e);
-					callback(nil, nil);
-					return;
-				}
-
-				[user saveInBackgroundWithBlock:^(BOOL succeeded, NSError * error) {
-					if (!succeeded || error)
-					{
-						callback(nil, nil);
-						return;
-					}
-
-					callback(image, thumb);
-				}];
-			} progressBlock:^(int percentDone) {
-				float progress = (float)percentDone / 100.0f * 0.7f + 0.3f;
-				for (id<NZParseAvatarListener> listener in g_AvatarListeners)
-					[listener onContinueUploadingAvatarForUser:user progress:progress requestID:requestID];
-			}];
-		} progressBlock:^(int percentDone) {
-			float progress = (float)percentDone / 100.0f * 0.3f;
-			for (id<NZParseAvatarListener> listener in g_AvatarListeners)
-				[listener onContinueUploadingAvatarForUser:user progress:progress requestID:requestID];
+			callback(image, thumb);
 		}];
-	});
+	};
+
+	[uploader start];
 }
 
 @end

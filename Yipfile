@@ -29,6 +29,7 @@ public_headers
 	ios/NZParseAvatarButton.h
 	ios/NZParseAvatarController.h
 	ios/NZParseAvatarImageView.h
+	ios/NZParseImageUploader.h
 }
 
 sources:ios
@@ -37,4 +38,5 @@ sources:ios
 	ios/NZParseAvatarButton.m
 	ios/NZParseAvatarController.m
 	ios/NZParseAvatarImageView.m
+	ios/NZParseImageUploader.m
 }
